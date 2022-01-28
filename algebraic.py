@@ -4,10 +4,7 @@ from threading import Timer
 from dataclasses import dataclass, field
 
 
-# TODO: need to add timer
-# TODO: need to add storage class
-# TODO: need to add second stage band finish first stage
-
+# TODO: need to fix timer
 
 @dataclass
 class Storage:
