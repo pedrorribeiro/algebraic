@@ -11,18 +11,19 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Storage:
-    listing: list
+    listing: dict
 
     def open_list(self):
-        self.listing = []
+        self.listing = {}
 
-    def dict_maker(self, text: str, result: float, timer: float):
-        dictionary = {
+    def dict_maker(self, iteration: int, text: str, result: float, timer: float):
+        dictionary = {iteration: {
             'operation': text,
             'result': result,
             'time': time
         }
-        self.listing.append(dictionary)
+        }
+        self.listing.update(dictionary)
 
 
 @dataclass
@@ -141,7 +142,7 @@ class Algebraic(Storage):
             math, text = self.count_control()
             final_time = time.time() * 1000
             timer = final_time - start_time
-            self.dict_maker(text, math, timer)
+            self.dict_maker(i, text, math, timer)
         self.second_stage()
 
     def second_stage(self):
@@ -150,9 +151,10 @@ class Algebraic(Storage):
                      'This time will be half the time you took to complete them the first time.'
         print(start_text)
         for i in self.listing:
-            operation = self.listing[i]['operation']
-            result = self.listing[i]['result']
-            timeout = self.listing[i]['timer']
+            op = self.listing[i]
+            operation = op['operation']
+            result = op['result']
+            timeout = op['time']
             t = Timer(timeout, print, ['Sorry, times up'])
             t.start()
             response = input(operation)
