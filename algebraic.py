@@ -1,4 +1,6 @@
 import random
+import asyncio
+import sys
 import time
 from threading import Timer
 from dataclasses import dataclass, field
@@ -17,7 +19,7 @@ class Storage:
         dictionary = {iteration: {
             'operation': text,
             'result': result,
-            'time': time
+            'time': timer
         }
         }
         self.listing.update(dictionary)
@@ -33,6 +35,13 @@ class Algebraic(Storage):
     z: int = 1
     b: int = 1
     allowed_types: list = field(default_factory=lambda: ['sum', 'sub', 'divide'])
+
+    @staticmethod
+    async def ainput(string: str) -> str:
+        await asyncio.get_event_loop().run_in_executor(
+            None, lambda s=string: sys.stdout.write(s + ' '))
+        return await asyncio.get_event_loop().run_in_executor(
+            None, sys.stdin.readline)
 
     def type_definition(self, count, dx, dy, dz, db):
         """
@@ -135,10 +144,10 @@ class Algebraic(Storage):
         print(start_text)
         time.sleep(5)
         for i in range(1, 10):
-            start_time = time.time() * 1000
+            start_time = time.time()
             math, text = self.count_control()
-            final_time = time.time() * 1000
-            timer = final_time - start_time
+            final_time = time.time()
+            timer = int((final_time - start_time))
             self.dict_maker(i, text, math, timer)
         self.second_stage()
 
@@ -147,17 +156,27 @@ class Algebraic(Storage):
                      'You will have a certain amount of time to complete these operations again. \n' \
                      'This time will be half the time you took to complete them the first time.'
         print(start_text)
+        time.sleep(5)
         for i in self.listing:
             op = self.listing[i]
             operation = op['operation']
             result = op['result']
-            timeout = op['time']
-            t = Timer(timeout, print, ['Sorry, times up'])
-            t.start()
-            response = input(operation)
-            t.cancel()
+            timeout = op['time']/2
+            print(timeout)
+            var = 0
+            response = self.ainput(operation)
+            start = time.time()
+            while response is None or var == 0:
+                timer = time.time() - start
+                if timer >= timeout:
+                    var = 1
             if response == result:
                 print('Correct!')
+            elif var == 1:
+                print('Time is up!')
             else:
                 print('Wrong!')
-            print('Thank you.')
+            var = 0
+        print('Thank you.')
+
+
