@@ -35,9 +35,17 @@ class Algebraic(Storage):
     z: int = 1
     b: int = 1
     allowed_types: list = field(default_factory=lambda: ['sum', 'sub', 'divide'])
+    status: int = 0
 
-    @staticmethod
-    async def ainput(string: str) -> str:
+    def start(self, operation):
+        self.status = 1
+        response = self.ainput(operation)
+        return response
+
+    def cancel(self):
+        self.status = 0
+
+    async def ainput(self, string: str) -> str:
         await asyncio.get_event_loop().run_in_executor(
             None, lambda s=string: sys.stdout.write(s + ' '))
         return await asyncio.get_event_loop().run_in_executor(
@@ -129,9 +137,9 @@ class Algebraic(Storage):
         math, text = self.make_algebra()
         response = float(input(text))
         if response == math:
-            print('Correct')
+            print('\nCorrect!\n')
         else:
-            print('Wrong')
+            print('\nWrong!\n')
         return math, text
 
     def first_phase(self):
@@ -139,11 +147,11 @@ class Algebraic(Storage):
         Manages first algebraic game phase.
         :return:
         """
-        start_text = 'You will now be shown several algebraic operations. You will have to solve each of them. \n' \
+        start_text = '\nYou will now be shown several algebraic operations. You will have to solve each of them. \n' \
                      'Take as long as you need to perform this task. You must not use paper, or a calculator. \n'
         print(start_text)
         time.sleep(5)
-        for i in range(1, 10):
+        for i in range(1, 11):
             start_time = time.time()
             math, text = self.count_control()
             final_time = time.time()
@@ -152,9 +160,9 @@ class Algebraic(Storage):
         self.second_stage()
 
     def second_stage(self):
-        start_text = 'You will now be shown the same operations you completed earlier. \n ' \
+        start_text = '\nYou will now be shown the same operations you completed earlier. \n' \
                      'You will have a certain amount of time to complete these operations again. \n' \
-                     'This time will be half the time you took to complete them the first time.'
+                     'This time will be half the time you took to complete them the first time.\n'
         print(start_text)
         time.sleep(5)
         for i in self.listing:
@@ -164,18 +172,21 @@ class Algebraic(Storage):
             timeout = op['time']/2
             print(timeout)
             var = 0
-            response = self.ainput(operation)
+            print(operation)
+            response = None
             start = time.time()
             while response is None or var == 0:
+                response = self.start(operation)
                 timer = time.time() - start
                 if timer >= timeout:
                     var = 1
             if response == result:
-                print('Correct!')
+                print('\nCorrect!\n')
             elif var == 1:
-                print('Time is up!')
+                print('\nTime is up!\n')
+                self.cancel()
             else:
-                print('Wrong!')
+                print('\nWrong!\n')
             var = 0
         print('Thank you.')
 
