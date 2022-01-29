@@ -6,7 +6,7 @@ from threading import Timer
 from dataclasses import dataclass, field
 
 
-# TODO: need to fix timer
+# TODO: need to fix async funtion
 
 @dataclass
 class Storage:
