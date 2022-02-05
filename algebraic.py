@@ -2,7 +2,7 @@ import random
 import asyncio
 import sys
 import time
-from threading import Timer
+from timex import timex
 from dataclasses import dataclass, field
 
 
@@ -39,9 +39,8 @@ class Algebraic(Storage):
     @staticmethod
     async def ainput(string: str) -> str:
         await asyncio.get_event_loop().run_in_executor(
-            None, lambda s=string: sys.stdout.write(s + ' '))
-        return await asyncio.get_event_loop().run_in_executor(
-            None, sys.stdin.readline)
+            None, lambda s=string: sys.stdout.write(s + '\n'))
+        return await asyncio.get_event_loop().run_in_executor(None, sys.stdin.readline)
 
     def type_definition(self, count, dx, dy, dz, db):
         """
@@ -129,9 +128,9 @@ class Algebraic(Storage):
         math, text = self.make_algebra()
         response = float(input(text))
         if response == math:
-            print('Correct')
+            print('\nCorrect!\n')
         else:
-            print('Wrong')
+            print('\nWrong!\n')
         return math, text
 
     def first_phase(self):
@@ -161,22 +160,14 @@ class Algebraic(Storage):
             op = self.listing[i]
             operation = op['operation']
             result = op['result']
-            timeout = op['time']/2
+            timeout = op['time'] / 2
             print(timeout)
-            var = 0
-            response = self.ainput(operation)
-            start = time.time()
-            while response is None or var == 0:
-                timer = time.time() - start
-                if timer >= timeout:
-                    var = 1
+            this = self
+            response = asyncio.run(timex(operation, timeout))
             if response == result:
                 print('Correct!')
-            elif var == 1:
-                print('Time is up!')
+            elif response == 5985:
+                pass
             else:
                 print('Wrong!')
-            var = 0
         print('Thank you.')
-
-
